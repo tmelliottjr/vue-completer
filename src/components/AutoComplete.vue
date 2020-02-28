@@ -1,0 +1,350 @@
+<template>
+  <div class="autocomplete__container">
+    <input
+      :aria-activedescendant="
+        suggestionsShouldShow
+          ? `autocomplete__suggestion-results-item--${currentIndex}`
+          : null
+      "
+      :aria-expanded="suggestionsShouldShow ? 'true' : 'false'"
+      @blur="onBlur"
+      @focus="onFocus"
+      @input="onInput"
+      @keydown="onKeyDown"
+      aria-autocomplete="both"
+      aria-owns="autocomplete__suggestion-results"
+      autocomplete="off"
+      class="autocomplete__input"
+      ref="input"
+      type="text"
+      v-bind="$attrs"
+      v-model="query"
+      v-on="inputListeners"
+    />
+    <div
+      class="autocomplete__suggestion-results-container"
+      id="autocomplete__suggestion-results"
+    >
+      <ul
+        class="autocomplete__suggestion-results-list"
+        v-if="suggestionsShouldShow"
+        role="listbox"
+      >
+        <AutoCompleteSuggestionItem
+          :key="index"
+          :shouldHighlight="currentIndex === index"
+          :suggestion="highlightQueryString(query, suggestionValue(suggestion))"
+          @select="onSelect"
+          v-for="(suggestion, index) in suggestions.slice(0, limit)"
+        />
+      </ul>
+    </div>
+  </div>
+</template>
+
+<script>
+import AutoCompleteSuggestionItem from './AutoCompleteSuggestionItem';
+
+export default {
+  inheritAttrs: false,
+  name: 'auto-complete',
+  components: {
+    AutoCompleteSuggestionItem,
+  },
+  mounted() {
+    // Allow easier access to the autocomplete input's ref
+    this.input = this.$refs.input;
+
+    // v-model initial value
+    this.query = this.value;
+  },
+  props: {
+    value: {
+      type: String,
+      default: null,
+    },
+    /**
+     * When true, selects the current highlighted suggestion on blur
+     */
+    selectOnBlur: {
+      type: Boolean,
+      default: true,
+    },
+    /**
+     * When true, automatically highlights the first suggestion
+     */
+    highlightFirst: {
+      type: Boolean,
+      default: true,
+    },
+    /**
+     * User supplied suggestions.
+     */
+    suggestions: {
+      type: Array,
+      required: true,
+    },
+    /**
+     * User supplied function to determine the suggestion value to display.
+     * i.e. An array of suggestion objects: [{ code: 'RI', value: 'Rhode Island' }]
+     */
+    suggestionValue: {
+      type: Function,
+      default: suggestion => suggestion,
+    },
+    /**
+     * Number of suggestions to display
+     */
+    limit: {
+      type: Number,
+      default: 5,
+    },
+  },
+  data() {
+    return {
+      /**
+       * The currently highlighted suggestion's index
+       */
+      currentIndex: null,
+      /**
+       * The currently selected suggestion
+       */
+      selection: null,
+      /**
+       * A reference to the autocomplete input element.
+       * This is used to allow easier access from parent components
+       */
+      input: null,
+      /**
+       * The autocomplete's current focus status
+       */
+      isFocused: false,
+      /**
+       * Used to force hide results. i.e. when a selection is made or the Esc key is hit.
+       */
+      hideResults: false,
+      /**
+       * The autocomplete input's model
+       */
+      query: '',
+    };
+  },
+  methods: {
+    onInput() {
+      // Ensure that the suggestion list is displayed after the user has made a selection,
+      // but has started typing in the autocomplete input again
+      this.hideResults = false;
+
+      // If a selection has previously been made, clear the selection on input.
+      // Do not fire on every input event.
+      if (this.selection) {
+        this.updateSelection(null);
+      }
+
+      // Unforunately, the watcher for suggestionsShouldShow is not a silver bullet.
+      // When the user is typing, ensure that highlighting is reset accordingly.
+      this.currentIndex = this.highlightFirst ? 0 : null;
+    },
+    onFocus() {
+      this.hideResults = false;
+      this.isFocused = true;
+    },
+    onBlur(e) {
+      if (
+        e.relatedTarget &&
+        typeof e.relatedTarget.dataset.acIgnoreBlur !== 'undefined'
+      ) {
+        e.preventDefault();
+        return;
+      }
+
+      if (this.selectOnBlur && this.suggestionsShouldShow) {
+        this.processSelection(this.currentIndex);
+      }
+
+      this.isFocused = false;
+    },
+    onKeyDown(e) {
+      const key = e.which || e.keyCode || 0;
+      /**
+       * 9:  Tab
+       * 13: Enter
+       * 27: Esc
+       * 38: Arrow Up
+       * 40: Arrow Down
+       */
+      switch (key) {
+        case 40:
+          e.preventDefault();
+          this.hideResults = false;
+          this.navigateSuggestions('down');
+          break;
+        case 38: {
+          e.preventDefault();
+          this.navigateSuggestions('up');
+          break;
+        }
+        case 9: {
+          // If selectOnBlur is true, prevent  selection on tab from also firing
+          if (!this.selectOnBlur) {
+            this.processSelection(this.currentIndex);
+          }
+          break;
+        }
+        case 13: {
+          this.processSelection(this.currentIndex);
+          break;
+        }
+        case 27: {
+          this.hideResults = true;
+          break;
+        }
+      }
+    },
+    onSelect(selectionIndex) {
+      this.processSelection(selectionIndex);
+    },
+    /**
+     * Updates the current selection and emits 'selectionChange' to update v-model.
+     * Fires when a selection is made or input changes.
+     *
+     * @param {Number} selectionIndex The current selection's index
+     */
+    updateSelection(selectionIndex) {
+      this.selection = this.suggestions[selectionIndex] || null;
+      this.$emit('selectionChange', this.selection);
+
+      // For completeness, when a selection is made also update v-model
+      this.$emit('input', this.suggestionValue(this.selection));
+    },
+    /**
+     * Processes the user's selection.
+     * onBlur, tab, enter, and click trigger this functionality.
+     *
+     * @param {Number} selectionIndex The current selection's index
+     */
+    processSelection(selectionIndex) {
+      if (selectionIndex === null) {
+        return;
+      }
+
+      this.updateSelection(selectionIndex);
+
+      // Update the input's value with the current selection's value
+      this.query = this.suggestionValue(this.selection);
+
+      // If the user has made a selection, this will hide the suggestions box
+      this.hideResults = true;
+    },
+    /**
+     * Handle traversing the suggestion list on arrow 'up' | 'down'.
+     *
+     *
+     * @param {String} direction The direction to traverse the suggestion list in
+     */
+    navigateSuggestions(direction) {
+      if (!this.suggestionsShouldShow) {
+        return;
+      }
+
+      const upperLimit = this.suggestions.length - 1;
+      const lowerLimit = 0;
+
+      const step = direction === 'up' ? -1 : 1;
+
+      // Nothing is currently highlighted
+      if (this.currentIndex === null) {
+        this.currentIndex = direction === 'down' ? lowerLimit : upperLimit;
+        return;
+      }
+
+      // Top of suggestion list
+      if (this.currentIndex === lowerLimit && direction === 'up') {
+        this.currentIndex = upperLimit;
+        return;
+      }
+
+      // Bottom of suggestion list
+      if (this.currentIndex === upperLimit && direction === 'down') {
+        this.currentIndex = lowerLimit;
+        return;
+      }
+
+      this.currentIndex += step;
+    },
+    /**
+     * Adds span wrap around search string
+     *
+     * @param {string} needle Search query
+     * @param {string} haystack String to search
+     */
+    highlightQueryString(needle, haystack) {
+      const searchString = this.escapeRegExp(needle);
+      try {
+        const re = new RegExp(searchString.trim(), 'sgi');
+        return haystack.replace(re, match => {
+          return `<span class="autocomplete__suggestion-query-match">${match}</span>`;
+        });
+      } catch (e) {
+        return haystack;
+      }
+    },
+    /**
+     * Escape regex reserved special characters
+     *
+     * @param {string} string string to escape
+     */
+    escapeRegExp(string) {
+      return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+    },
+  },
+  computed: {
+    /**
+     * Allow listeners to be added to the input element.
+     */
+    inputListeners() {
+      const vm = this;
+      return {
+        ...this.$listeners,
+        /**
+         * Don't do anything native for input, allowing v-model to work seemlessly.
+         */
+        input(event) {
+          vm.$emit('input', event.target.value);
+        },
+      };
+    },
+    /**
+     * Determine's whether or not the suggestions list should be displayed.
+     */
+    suggestionsShouldShow() {
+      return (
+        this.isFocused &&
+        this.query.trim().length > 0 &&
+        this.suggestions.length > 0 &&
+        !this.hideResults
+      );
+    },
+  },
+  watch: {
+    suggestionsShouldShow(shouldShow) {
+      // When suggestions should be displayed and the user has not
+      // already started traversing the suggestion list, ensure
+      // that the first item is highlighed if highlightFirst is true
+      if (shouldShow && this.currentIndex === null && this.highlightFirst) {
+        this.currentIndex = 0;
+        return;
+      }
+
+      // When suggestions should not be displayed, reset the current index to ensure
+      // suggestion traversal/highlighting is reset
+      if (!shouldShow) {
+        this.currentIndex = null;
+        return;
+      }
+    },
+  },
+};
+</script>
+
+<style></style>

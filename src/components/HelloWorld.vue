@@ -1,16 +1,22 @@
 <template>
   <div>
-    {{ selection }}
+    <pre>{{ selection }}</pre>
     <AutoComplete
-      :suggestionFilter="suggestionFilter"
+      :highlightFirst="true"
       :limit="5"
+      :selectOnBlur="true"
+      :suggestionFilter="suggestionFilter"
+      :suggestionValue="suggestion => suggestion.value"
       @select="onSelect"
+      ref="autocomplete"
+      v-model="selection"
     ></AutoComplete>
   </div>
 </template>
 
 <script>
 import AutoComplete from './AutoComplete';
+import geodata from '../geodata';
 
 export default {
   name: 'HelloWorld',
@@ -22,80 +28,30 @@ export default {
   },
   data() {
     return {
+      lastResult: [],
       selection: null,
-      dataset: [
-        'Alabama',
-        'Alaska',
-        'American Samoa',
-        'Arizona',
-        'Arkansas',
-        'California',
-        'Colorado',
-        'Connecticut',
-        'Delaware',
-        'District of Columbia',
-        'Federated States of Micronesia',
-        'Florida',
-        'Georgia',
-        'Guam',
-        'Hawaii',
-        'Idaho',
-        'Illinois',
-        'Indiana',
-        'Iowa',
-        'Kansas',
-        'Kentucky',
-        'Louisiana',
-        'Maine',
-        'Marshall Islands',
-        'Maryland',
-        'Massachusetts',
-        'Michigan',
-        'Minnesota',
-        'Mississippi',
-        'Missouri',
-        'Montana',
-        'Nebraska',
-        'Nevada',
-        'New Hampshire',
-        'New Jersey',
-        'New Mexico',
-        'New York',
-        'North Carolina',
-        'North Dakota',
-        'Northern Mariana Islands',
-        'Ohio',
-        'Oklahoma',
-        'Oregon',
-        'Palau',
-        'Pennsylvania',
-        'Puerto Rico',
-        'Rhode Island',
-        'South Carolina',
-        'South Dakota',
-        'Tennessee',
-        'Texas',
-        'Utah',
-        'Vermont',
-        'Virgin Island',
-        'Virginia',
-        'Washington',
-        'West Virginia',
-        'Wisconsin',
-        'Wyoming',
-      ],
+      dataset: geodata,
     };
   },
   methods: {
     onSelect(e) {
-      this.selection = e;
+      console.log(e);
     },
     suggestionFilter(query) {
-      return this.dataset.filter(suggestion => {
+      let result = this.dataset.filter(suggestion => {
         return (
-          query !== '' && suggestion.toLowerCase().includes(query.toLowerCase())
+          query !== '' &&
+          suggestion.value.toLowerCase().includes(query.toLowerCase())
         );
       });
+
+      // Emulates default on none.
+      if (query && !result.length) {
+        return this.lastResult;
+      }
+
+      this.lastResult = result;
+      return result;
     },
   },
 };

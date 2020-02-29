@@ -1,19 +1,20 @@
 <template>
   <li
     :class="{ 'autocomplete__suggestion-item--highlighted': shouldHighlight }"
+    :id="`autocomplete__suggsetion-item--${$vnode.key}`"
     @click="$emit('select', $vnode.key)"
     class="autocomplete__suggestion-item"
     data-ac-ignore-blur
     tabindex="-1"
   >
-    {{ suggestion }}
+    {{ suggestionValue(suggestion) }}
   </li>
 </template>
 
 <script>
 export default {
   name: 'auto-complete-suggestion-item',
-  props: ['suggestion', 'shouldHighlight'],
+  props: ['suggestion', 'shouldHighlight', 'suggestionValue'],
 };
 </script>
 

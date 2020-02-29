@@ -3,14 +3,20 @@
     <input
       @blur="onBlur"
       @focus="onFocus"
-      @input="madeSelection = false"
+      @input="onInput"
       @keydown="onKeyDown"
+      autocomplete="off"
       class="autocomplete__input"
+      ref="input"
       type="text"
+      v-bind="$attrs"
       v-model="query"
+      v-on="$listeners"
     />
+
     <AutoCompleteSuggestions
       :currentIndex="computedCurrentIndex"
+      :suggestionValue="suggestionValue"
       :suggestions="filteredSuggestions"
       @select="onSelect"
       v-show="filteredSuggestions && suggestionsShouldShow"
@@ -22,9 +28,17 @@
 import AutoCompleteSuggestions from './AutoCompleteSuggestions';
 
 export default {
+  inheritAttrs: false,
   name: 'auto-complete',
   components: {
     AutoCompleteSuggestions,
+  },
+  mounted() {
+    this.input = this.$refs.input;
+  },
+  model: {
+    prop: 'value',
+    event: 'selectionChange',
   },
   props: {
     selectOnBlur: {
@@ -39,13 +53,27 @@ export default {
       type: Function,
       required: true,
     },
+    suggestionValue: {
+      type: Function,
+      default: suggestion => suggestion,
+    },
     limit: {
       type: Number,
       default: 10,
     },
+    inputProps: {
+      type: Object,
+      default: () => {},
+    },
+    inputListeners: {
+      type: Object,
+      default: () => {},
+    },
+    value: {},
   },
   data() {
     return {
+      input: null,
       currentIndex: null,
       currentSelection: null,
       defaultIndex: 0,
@@ -55,8 +83,14 @@ export default {
     };
   },
   methods: {
+    onInput() {
+      this.madeSelection = false;
+
+      // Enables v-model support, fires when a selection is made or input changes.
+      this.$emit('selectionChange', null);
+    },
     onFocus() {
-      if (this.highlightFirst) {
+      if (this.highlightFirst && this.filteredSuggestions.length) {
         this.currentIndex = 0;
       }
       this.isFocused = true;
@@ -71,8 +105,9 @@ export default {
       }
       // TODO: Move to select handler
       if (this.selectOnBlur) {
-        this.onSelect(this.currentIndex);
+        this.onSelect(this.computedCurrentIndex);
       }
+
       this.currentIndex = null;
       this.isFocused = false;
       this.madeSelection = false;
@@ -127,7 +162,8 @@ export default {
       this.currentSelection = e;
 
       // TODO: update to use object value
-      this.query = this.filteredSuggestions[e];
+      const selection = this.filteredSuggestions[e];
+      this.query = this.suggestionValue(selection);
 
       this.madeSelection = true;
 
@@ -136,7 +172,11 @@ export default {
         this.currentIndex = null;
       });
 
-      this.$emit('select', e);
+      // Enables v-model support, fires when a selection is made or input changes.
+      this.$emit('selectionChange', selection);
+
+      // Fires only when an actual selection is made, i.e. onBlur, click, tab, enter
+      this.$emit('select', selection);
     },
   },
   watch: {
@@ -148,7 +188,7 @@ export default {
   },
   computed: {
     suggestionsShouldShow() {
-      return this.isFocused && !this.madeSelection;
+      return this.isFocused && !this.madeSelection && this.query;
     },
     computedCurrentIndex() {
       if (!this.suggestionsShouldShow) {
@@ -174,6 +214,7 @@ export default {
   font-size: 16px;
   box-sizing: border-box;
   border: 1px solid rgb(233, 233, 233);
+  z-index: 999;
 }
 
 .autocomplete__container {
@@ -182,6 +223,5 @@ export default {
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  border: 1px solid#bbc0c4;
 }
 </style>

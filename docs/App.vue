@@ -1,19 +1,11 @@
 <template>
   <div>
-    <pre>{{ query }}</pre>
-    <pre>{{ { selection } }}</pre>
-    <pre>{{ { selectionChange } }}</pre>
-
     <AutoComplete
-      :highlightFirst="false"
       :limit="5"
-      @blur="onBlur"
-      @focus="onFocus"
-      id="what i want"
-      :selectOnBlur="true"
       :suggestions="suggestions"
-      ref="autocomplete"
+      @focus="onFocus"
       @selectionChange="onSelectionChange"
+      ref="autocomplete"
       v-model="query"
     ></AutoComplete>
   </div>
@@ -32,7 +24,7 @@ export default {
   },
   data() {
     return {
-      query: 'Thomas',
+      query: null,
       select: null,
       selectionChange: null,
       lastResult: [],
@@ -49,15 +41,8 @@ export default {
     };
   },
   methods: {
-    onFocus() {
-      // this.$refs.autocomplete.input.setSel();
-    },
-    onBlur(e) {
-      console.log(e);
-    },
     onSelectionChange(e) {
       this.selectionChange = e;
-      console.log('here');
     },
     suggestionFilter(query) {
       if (!query) {
@@ -78,19 +63,12 @@ export default {
     },
   },
   computed: {
-    /**
-     * Filter the user's using the provided suggestion filter functionx
-     */
     suggestions() {
       if (!this.query) {
         return [];
       }
 
-      const suggestions = this.suggestionFilter(this.query);
-
-      return Array.isArray(suggestions) && suggestions.length
-        ? suggestions.slice(0, this.limit)
-        : [];
+      return this.suggestionFilter(this.query);
     },
   },
 };

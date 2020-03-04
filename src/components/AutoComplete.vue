@@ -320,6 +320,7 @@ export default {
     suggestionsShouldShow() {
       return (
         this.isFocused &&
+        this.query &&
         this.query.trim().length > 0 &&
         this.suggestions.length > 0 &&
         !this.hideResults

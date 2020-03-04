@@ -3,7 +3,6 @@
     <AutoComplete
       :limit="5"
       :suggestions="suggestions"
-      @focus="onFocus"
       @selectionChange="onSelectionChange"
       ref="autocomplete"
       v-model="query"

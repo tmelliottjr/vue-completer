@@ -7,6 +7,7 @@
           : null
       "
       :aria-expanded="suggestionsShouldShow ? 'true' : 'false'"
+      :value="query"
       @blur="onBlur"
       @focus="onFocus"
       @input="onInput"
@@ -18,7 +19,6 @@
       ref="input"
       type="text"
       v-bind="$attrs"
-      v-model="query"
       v-on="inputListeners"
     />
     <div
@@ -27,16 +27,23 @@
     >
       <ul
         class="autocomplete__suggestion-results-list"
-        v-if="suggestionsShouldShow"
         role="listbox"
+        v-if="suggestionsShouldShow"
       >
         <AutoCompleteSuggestionItem
           :key="index"
           :shouldHighlight="currentIndex === index"
-          :suggestion="highlightQueryString(query, suggestionValue(suggestion))"
           @select="onSelect"
-          v-for="(suggestion, index) in suggestions.slice(0, limit)"
-        />
+          v-for="(suggestion, index) in limitedSuggestions"
+        >
+          <!-- suggestion slot was not provided, use defaults -->
+          <span
+            v-html="formattedSuggestion(suggestion)"
+            v-if="!$scopedSlots.default"
+          ></span>
+          <!-- suggestion slot was provided -->
+          <slot v-else v-bind:suggestion="suggestion" />
+        </AutoCompleteSuggestionItem>
       </ul>
     </div>
   </div>
@@ -48,18 +55,21 @@ import AutoCompleteSuggestionItem from './AutoCompleteSuggestionItem';
 export default {
   inheritAttrs: false,
   name: 'auto-complete',
+  model: {
+    prop: 'query',
+  },
   components: {
     AutoCompleteSuggestionItem,
   },
   mounted() {
     // Allow easier access to the autocomplete input's ref
     this.input = this.$refs.input;
-
-    // v-model initial value
-    this.query = this.value;
   },
   props: {
-    value: {
+    /**
+     * The prop used for v-model
+     */
+    query: {
       type: String,
       default: null,
     },
@@ -99,6 +109,13 @@ export default {
       type: Number,
       default: 5,
     },
+    /**
+     * Should arrows stop at bottom/top suggestion
+     */
+    noCycle: {
+      type: Boolean,
+      default: false,
+    },
   },
   data() {
     return {
@@ -123,13 +140,12 @@ export default {
        * Used to force hide results. i.e. when a selection is made or the Esc key is hit.
        */
       hideResults: false,
-      /**
-       * The autocomplete input's model
-       */
-      query: '',
     };
   },
   methods: {
+    /**
+     * Input event handler
+     */
     onInput() {
       // Ensure that the suggestion list is displayed after the user has made a selection,
       // but has started typing in the autocomplete input again
@@ -141,29 +157,32 @@ export default {
         this.updateSelection(null);
       }
 
-      // Unforunately, the watcher for suggestionsShouldShow is not a silver bullet.
-      // When the user is typing, ensure that highlighting is reset accordingly.
+      // Ensure the appropriate suggestion is highlighted
       this.currentIndex = this.highlightFirst ? 0 : null;
     },
+    /**
+     * Focus event handler
+     */
     onFocus() {
       this.hideResults = false;
       this.isFocused = true;
-    },
-    onBlur(e) {
-      if (
-        e.relatedTarget &&
-        typeof e.relatedTarget.dataset.acIgnoreBlur !== 'undefined'
-      ) {
-        e.preventDefault();
-        return;
-      }
 
+      // Ensure the appropriate suggestion is highlighted
+      this.currentIndex = this.highlightFirst ? 0 : null;
+    },
+    /**
+     * Blur event handler
+     */
+    onBlur() {
       if (this.selectOnBlur && this.suggestionsShouldShow) {
         this.processSelection(this.currentIndex);
       }
 
       this.isFocused = false;
     },
+    /**
+     * KeyDown event handler
+     */
     onKeyDown(e) {
       const key = e.which || e.keyCode || 0;
       /**
@@ -197,10 +216,16 @@ export default {
         }
         case 27: {
           this.hideResults = true;
+
+          // Reset the highlight position
+          this.currentIndex = null;
           break;
         }
       }
     },
+    /**
+     * Select event handler
+     */
     onSelect(selectionIndex) {
       this.processSelection(selectionIndex);
     },
@@ -212,10 +237,15 @@ export default {
      */
     updateSelection(selectionIndex) {
       this.selection = this.suggestions[selectionIndex] || null;
+
+      const suggestionValue = this.selection
+        ? this.suggestionValue(this.selection)
+        : null;
+
       this.$emit('selectionChange', this.selection);
 
       // For completeness, when a selection is made also update v-model
-      this.$emit('input', this.suggestionValue(this.selection));
+      this.$emit('input', suggestionValue);
     },
     /**
      * Processes the user's selection.
@@ -231,14 +261,13 @@ export default {
       this.updateSelection(selectionIndex);
 
       // Update the input's value with the current selection's value
-      this.query = this.suggestionValue(this.selection);
+      this.setQuery(this.suggestionValue(this.selection));
 
       // If the user has made a selection, this will hide the suggestions box
       this.hideResults = true;
     },
     /**
      * Handle traversing the suggestion list on arrow 'up' | 'down'.
-     *
      *
      * @param {String} direction The direction to traverse the suggestion list in
      */
@@ -247,7 +276,7 @@ export default {
         return;
       }
 
-      const upperLimit = this.suggestions.length - 1;
+      const upperLimit = this.limitedSuggestions.length - 1;
       const lowerLimit = 0;
 
       const step = direction === 'up' ? -1 : 1;
@@ -259,13 +288,23 @@ export default {
       }
 
       // Top of suggestion list
-      if (this.currentIndex === lowerLimit && direction === 'up') {
+      const reachedLowerLimit =
+        this.currentIndex === lowerLimit && direction === 'up';
+
+      // Bottom of suggestion list
+      const reachedUpperLimit =
+        this.currentIndex === upperLimit && direction === 'down';
+
+      if ((reachedLowerLimit || reachedUpperLimit) && this.noCycle) {
+        return;
+      }
+
+      if (reachedLowerLimit) {
         this.currentIndex = upperLimit;
         return;
       }
 
-      // Bottom of suggestion list
-      if (this.currentIndex === upperLimit && direction === 'down') {
+      if (reachedUpperLimit) {
         this.currentIndex = lowerLimit;
         return;
       }
@@ -277,6 +316,7 @@ export default {
      *
      * @param {string} needle Search query
      * @param {string} haystack String to search
+     * @returns {string} The full string including span wrap
      */
     highlightQueryString(needle, haystack) {
       const searchString = this.escapeRegExp(needle);
@@ -293,14 +333,37 @@ export default {
      * Escape regex reserved special characters
      *
      * @param {string} string string to escape
+     * @returns {string} The RegExp escaped query string
      */
     escapeRegExp(string) {
       return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+    },
+    /**
+     * Formats the suggestion to be rendered
+     *
+     * @param {mixed} suggestion The suggestion to highlight
+     * @returns {mixed} The highlighted suggestion
+     */
+    formattedSuggestion(suggestion) {
+      return this.highlightQueryString(
+        this.query,
+        this.suggestionValue(suggestion),
+      );
+    },
+    /**
+     * Helper to emit input event to update v-model
+     *
+     * @param {string} value The value of the event
+     */
+    setQuery(value) {
+      this.$emit('input', value);
     },
   },
   computed: {
     /**
      * Allow listeners to be added to the input element.
+     *
+     * @returns {object} An object of listeners to apply to the input element
      */
     inputListeners() {
       const vm = this;
@@ -308,44 +371,36 @@ export default {
         ...this.$listeners,
         /**
          * Don't do anything native for input, allowing v-model to work seemlessly.
+         *
          */
         input(event) {
-          vm.$emit('input', event.target.value);
+          vm.setQuery(event.target.value);
         },
       };
     },
     /**
      * Determine's whether or not the suggestions list should be displayed.
+     *
+     * @returns {boolean} Suggestions should show
      */
     suggestionsShouldShow() {
       return (
         this.isFocused &&
         this.query &&
         this.query.trim().length > 0 &&
-        this.suggestions.length > 0 &&
+        this.limitedSuggestions.length > 0 &&
         !this.hideResults
       );
     },
-  },
-  watch: {
-    suggestionsShouldShow(shouldShow) {
-      // When suggestions should be displayed and the user has not
-      // already started traversing the suggestion list, ensure
-      // that the first item is highlighed if highlightFirst is true
-      if (shouldShow && this.currentIndex === null && this.highlightFirst) {
-        this.currentIndex = 0;
-        return;
-      }
-
-      // When suggestions should not be displayed, reset the current index to ensure
-      // suggestion traversal/highlighting is reset
-      if (!shouldShow) {
-        this.currentIndex = null;
-        return;
-      }
+    /**
+     * Limit's the suggestions to be rendered. This is merely a useful helper,
+     * The parent component could also limit the suggestions prop themselves if wanted.
+     *
+     * @returns {array} The suggestion list to be rendered
+     */
+    limitedSuggestions() {
+      return this.suggestions.slice(0, this.limit);
     },
   },
 };
 </script>
-
-<style></style>

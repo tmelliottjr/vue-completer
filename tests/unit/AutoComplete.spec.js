@@ -14,7 +14,7 @@ const simpleSuggestions = [
 
 const simpleSuggestionsFilter = query => {
   if (!query) {
-    return;
+    return [];
   }
 
   return simpleSuggestions.filter(s => {
@@ -35,7 +35,7 @@ const complexSuggestions = [
 
 const complexSuggestionsFilter = query => {
   if (!query) {
-    return;
+    return [];
   }
 
   return complexSuggestions.filter(s => {
@@ -53,11 +53,21 @@ describe('AutoComplete.vue', () => {
   });
 
   it('renders simple suggestions', async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-    };
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+        };
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestions="suggestions"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
 
-    const wrapper = mount(AutoComplete, { propsData });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -75,14 +85,26 @@ describe('AutoComplete.vue', () => {
   });
 
   it('renders complex suggestions', async () => {
-    const propsData = {
-      suggestions: complexSuggestionsFilter('j'),
-      suggestionValue(suggestion) {
-        return suggestion.value;
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+        };
       },
-    };
+      methods: {
+        suggestionValue(suggestion) {
+          return suggestion.value;
+        },
+      },
+      computed: {
+        suggestions() {
+          return complexSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestionValue="suggestionValue" :suggestions="suggestions"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
 
-    const wrapper = mount(AutoComplete, { propsData });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -100,14 +122,30 @@ describe('AutoComplete.vue', () => {
   });
 
   it('returns complex suggestion', async () => {
-    const propsData = {
-      suggestions: complexSuggestionsFilter('j'),
-      suggestionValue(suggestion) {
-        return suggestion.value;
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+          selection: null,
+        };
       },
-    };
+      methods: {
+        suggestionValue(suggestion) {
+          return suggestion.value;
+        },
+        selectionChange(selection) {
+          this.selection = selection;
+        },
+      },
+      computed: {
+        suggestions() {
+          return complexSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestionValue="suggestionValue" :suggestions="suggestions" @selectionChange="selectionChange"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
 
-    const wrapper = mount(AutoComplete, { propsData });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -115,23 +153,31 @@ describe('AutoComplete.vue', () => {
 
     await wrapper.vm.$nextTick();
 
-    wrapper.find('#autocomplete__suggestion-results-item--3').trigger('click');
+    wrapper
+      .find('#autocomplete__suggestion-results-item--3')
+      .trigger('mousedown');
 
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.emitted().selectionChange[0]).toEqual([
-      { code: 'DD', value: 'Jonathon' },
-    ]);
-    expect(wrapper.emitted().selectionChange).toBeTruthy();
+    expect(wrapper.vm.selection).toEqual({ code: 'DD', value: 'Jonathon' });
   });
 
   it('limits rendered suggestions', async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-      limit: 2,
-    };
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+        };
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :limit="2" :suggestions="suggestions"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
 
-    const wrapper = mount(AutoComplete, { propsData });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -145,11 +191,21 @@ describe('AutoComplete.vue', () => {
   });
 
   it('closes suggestions on Escape', async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-    };
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+        };
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestions="suggestions"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
 
-    const wrapper = mount(AutoComplete, { propsData });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -171,11 +227,21 @@ describe('AutoComplete.vue', () => {
   });
 
   it('re-opens suggestions on arrow down', async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-    };
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+        };
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestions="suggestions"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
 
-    const wrapper = mount(AutoComplete, { propsData });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -205,11 +271,20 @@ describe('AutoComplete.vue', () => {
   });
 
   it('re-opens suggestions on input', async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-    };
-
-    const wrapper = mount(AutoComplete, { propsData });
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+        };
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestions="suggestions"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -239,11 +314,21 @@ describe('AutoComplete.vue', () => {
   });
 
   it('closes suggestions on blur', async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-    };
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+        };
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestions="suggestions"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
 
-    const wrapper = mount(AutoComplete, { propsData });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -265,12 +350,21 @@ describe('AutoComplete.vue', () => {
   });
 
   it('navigates suggestions with arrow keys', async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-      highlightFirst: false,
-    };
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+        };
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :highlightFirst="false" :suggestions="suggestions"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
 
-    const wrapper = mount(AutoComplete, { propsData });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -315,12 +409,27 @@ describe('AutoComplete.vue', () => {
   });
 
   it('makes selection on click', async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-      highlightFirst: false,
-    };
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+          selection: null,
+        };
+      },
+      methods: {
+        selectionChange(selection) {
+          this.selection = selection;
+        },
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestions="suggestions" :highlightFirst="false" @selectionChange="selectionChange"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
 
-    const wrapper = mount(AutoComplete, { propsData });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -328,22 +437,38 @@ describe('AutoComplete.vue', () => {
 
     await wrapper.vm.$nextTick();
 
-    wrapper.find('#autocomplete__suggestion-results-item--3').trigger('click');
+    wrapper
+      .find('#autocomplete__suggestion-results-item--3')
+      .trigger('mousedown');
 
     await wrapper.vm.$nextTick();
 
     expect(inputWrapper.element.value).toBe('Jonathon');
-    expect(wrapper.emitted().selectionChange[0]).toEqual(['Jonathon']);
-    expect(wrapper.emitted().selectionChange).toBeTruthy();
+    expect(wrapper.vm.selection).toEqual('Jonathon');
   });
 
   it('makes selection on Enter', async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-      highlightFirst: false,
-    };
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+          selection: null,
+        };
+      },
+      methods: {
+        selectionChange(selection) {
+          this.selection = selection;
+        },
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestions="suggestions" :highlightFirst="false" @selectionChange="selectionChange"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
 
-    const wrapper = mount(AutoComplete, { propsData });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -364,16 +489,31 @@ describe('AutoComplete.vue', () => {
     await wrapper.vm.$nextTick();
 
     expect(inputWrapper.element.value).toBe('Joanne');
-    expect(wrapper.emitted().selectionChange).toBeTruthy();
+    expect(wrapper.vm.selection).toBe('Joanne');
   });
 
   it('makes selection on Tab when selectOnBlur is false', async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-      selectOnBlur: false,
-    };
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+          selection: null,
+        };
+      },
+      methods: {
+        selectionChange(selection) {
+          this.selection = selection;
+        },
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestions="suggestions" :selectOnBlur="false" @selectionChange="selectionChange"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
 
-    const wrapper = mount(AutoComplete, { propsData });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -394,15 +534,30 @@ describe('AutoComplete.vue', () => {
     await wrapper.vm.$nextTick();
 
     expect(inputWrapper.element.value).toBe('John');
-    expect(wrapper.emitted().selectionChange).toBeTruthy();
+    expect(wrapper.vm.selection).toBe('John');
   });
 
   it('does not make selection on Tab when selectOnBlur is true', async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-    };
-
-    const wrapper = mount(AutoComplete, { propsData });
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+          selection: null,
+        };
+      },
+      methods: {
+        selectionChange(selection) {
+          this.selection = selection;
+        },
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestions="suggestions" @selectionChange="selectionChange"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -423,15 +578,31 @@ describe('AutoComplete.vue', () => {
     await wrapper.vm.$nextTick();
 
     expect(inputWrapper.element.value).toBe('j');
-    expect(wrapper.emitted().selectionChange).toBeFalsy();
+    expect(wrapper.vm.selection).toBe(null);
   });
 
   it('makes selection on blur when selectOnBlur is true', async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-    };
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+          selection: null,
+        };
+      },
+      methods: {
+        selectionChange(selection) {
+          this.selection = selection;
+        },
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestions="suggestions" @selectionChange="selectionChange"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
 
-    const wrapper = mount(AutoComplete, { propsData });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -452,17 +623,30 @@ describe('AutoComplete.vue', () => {
     await wrapper.vm.$nextTick();
 
     expect(inputWrapper.element.value).toBe('John');
-    expect(wrapper.emitted().selectionChange[0]).toEqual(['John']);
-    expect(wrapper.emitted().selectionChange).toBeTruthy();
+    expect(wrapper.vm.selection).toBe('John');
   });
 
   it('does not make selection on blur when selectOnBlur is false', async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-      selectOnBlur: false,
-    };
-
-    const wrapper = mount(AutoComplete, { propsData });
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+          selection: null,
+        };
+      },
+      methods: {
+        selectionChange(selection) {
+          this.selection = selection;
+        },
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestions="suggestions" :selectOnBlur="false" @selectionChange="selectionChange"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -483,16 +667,31 @@ describe('AutoComplete.vue', () => {
     await wrapper.vm.$nextTick();
 
     expect(inputWrapper.element.value).toBe('j');
-    expect(wrapper.emitted('selectionChange')).toBeFalsy();
+    expect(wrapper.vm.selection).toBe(null);
   });
 
   it("emits 'input' on selection", async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-      highlightFirst: false,
-    };
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+          selection: null,
+        };
+      },
+      methods: {
+        selectionChange(selection) {
+          this.selection = selection;
+        },
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestions="suggestions" :highlightFirst="false" @selectionChange="selectionChange"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
 
-    const wrapper = mount(AutoComplete, { propsData });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -500,21 +699,37 @@ describe('AutoComplete.vue', () => {
 
     await wrapper.vm.$nextTick();
 
-    wrapper.find('#autocomplete__suggestion-results-item--3').trigger('click');
+    wrapper
+      .find('#autocomplete__suggestion-results-item--3')
+      .trigger('mousedown');
 
     await wrapper.vm.$nextTick();
 
-    expect(wrapper.emitted().input[1]).toEqual(['Jonathon']);
-    expect(wrapper.emitted().input).toBeTruthy();
+    expect(wrapper.vm.query).toEqual('Jonathon');
   });
 
   it('highlights first suggestion when highlightFirst prop is true', async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-      highlightFirst: true,
-    };
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+          selection: null,
+        };
+      },
+      methods: {
+        selectionChange(selection) {
+          this.selection = selection;
+        },
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestions="suggestions" @selectionChange="selectionChange"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
 
-    const wrapper = mount(AutoComplete, { propsData });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -530,12 +745,27 @@ describe('AutoComplete.vue', () => {
   });
 
   it('does not highlight first suggestion when highlightFirst prop is false', async () => {
-    const propsData = {
-      suggestions: simpleSuggestionsFilter('j'),
-      highlightFirst: false,
-    };
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+          selection: null,
+        };
+      },
+      methods: {
+        selectionChange(selection) {
+          this.selection = selection;
+        },
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestions="suggestions" :highlightFirst="false" @selectionChange="selectionChange"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
 
-    const wrapper = mount(AutoComplete, { propsData });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
     inputWrapper.trigger('focus');
@@ -548,5 +778,51 @@ describe('AutoComplete.vue', () => {
         .find('#autocomplete__suggestion-results-item--0')
         .classes('autocomplete__suggestion-results-item--highlighted'),
     ).toBe(false);
+  });
+
+  it('renders suggestion slot', async () => {
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+          selection: null,
+        };
+      },
+      methods: {
+        selectionChange(selection) {
+          this.selection = selection;
+        },
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div>
+                <auto-complete v-model="query" :suggestions="suggestions" :highlightFirst="false" @selectionChange="selectionChange">
+                  <template v-slot="{suggestion}">
+                    <div class="test-slot__suggestion"> {{ suggestion }} </div>
+                  </template>
+                </auto-complete>
+              </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
+
+    const inputWrapper = wrapper.find('.autocomplete__input');
+
+    inputWrapper.trigger('focus');
+    inputWrapper.setValue('j');
+
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.findAll('.test-slot__suggestion').length).toBe(4);
+    
+    expect(
+      wrapper.findAll('.autocomplete__suggestion-results-item').length,
+    ).toBe(4);
+
+    expect(
+      wrapper.find('#autocomplete__suggestion-results-item--0').text(),
+    ).toBe('Jacob');
   });
 });

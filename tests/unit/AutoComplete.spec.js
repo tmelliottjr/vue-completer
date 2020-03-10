@@ -349,7 +349,7 @@ describe('AutoComplete.vue', () => {
     ).toBe(false);
   });
 
-  it('navigates suggestions with arrow keys', async () => {
+  it('navigates suggestions with arrow keys correctly when noCycle is off', async () => {
     const wrapper = mount({
       data() {
         return {
@@ -372,31 +372,99 @@ describe('AutoComplete.vue', () => {
 
     await wrapper.vm.$nextTick();
 
-    expect(
-      wrapper.find('.autocomplete__suggestion-results-list').exists(),
-    ).toBe(true);
-
-    expect(
-      wrapper
-        .find('#autocomplete__suggestion-results-item--0')
-        .classes('autocomplete__suggestion-results-item--highlighted'),
-    ).toBe(false);
-
-    // First suggestion (0)
+    // Cycle through list to back to top most suggestions 0>1>2>3>0
     inputWrapper.trigger('keydown.down');
-
-    // Second suggestion (2)
+    inputWrapper.trigger('keydown.down');
+    inputWrapper.trigger('keydown.down');
+    inputWrapper.trigger('keydown.down');
     inputWrapper.trigger('keydown.down');
 
     await wrapper.vm.$nextTick();
 
     expect(
       wrapper
-        .find('#autocomplete__suggestion-results-item--1')
+        .find('#autocomplete__suggestion-results-item--0')
         .classes('autocomplete__suggestion-results-item--highlighted'),
     ).toBe(true);
 
-    // First suggestion (0)
+    // Last suggestion (3)
+    inputWrapper.trigger('keydown.up');
+
+    await wrapper.vm.$nextTick();
+
+    expect(
+      wrapper
+        .find('#autocomplete__suggestion-results-item--3')
+        .classes('autocomplete__suggestion-results-item--highlighted'),
+    ).toBe(true);
+
+    // First Suggestion
+    inputWrapper.trigger('keydown.down');
+
+    await wrapper.vm.$nextTick();
+
+    expect(
+      wrapper
+        .find('#autocomplete__suggestion-results-item--0')
+        .classes('autocomplete__suggestion-results-item--highlighted'),
+    ).toBe(true);
+  });
+
+  it('navigates suggestions with arrow keys correctly when noCycle is on', async () => {
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+        };
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :highlightFirst="false" :noCycle="true" :suggestions="suggestions"></auto-complete> </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
+
+    const inputWrapper = wrapper.find('.autocomplete__input');
+
+    inputWrapper.trigger('focus');
+    inputWrapper.setValue('j');
+
+    await wrapper.vm.$nextTick();
+
+    // Cycle through list to back to top most suggestions 0>1>2>3>0
+    // Should stop at last suggestion (3)
+    inputWrapper.trigger('keydown.down');
+    inputWrapper.trigger('keydown.down');
+    inputWrapper.trigger('keydown.down');
+    inputWrapper.trigger('keydown.down');
+    inputWrapper.trigger('keydown.down');
+
+    await wrapper.vm.$nextTick();
+
+    expect(
+      wrapper
+        .find('#autocomplete__suggestion-results-item--3')
+        .classes('autocomplete__suggestion-results-item--highlighted'),
+    ).toBe(true);
+
+    // Second to last suggestion (2)
+    inputWrapper.trigger('keydown.up');
+
+    await wrapper.vm.$nextTick();
+
+    expect(
+      wrapper
+        .find('#autocomplete__suggestion-results-item--2')
+        .classes('autocomplete__suggestion-results-item--highlighted'),
+    ).toBe(true);
+
+    // Cycle back up and around suggestion list
+    // Should stop on first suggestion (0)
+    inputWrapper.trigger('keydown.up');
+    inputWrapper.trigger('keydown.up');
+    inputWrapper.trigger('keydown.up');
     inputWrapper.trigger('keydown.up');
 
     await wrapper.vm.$nextTick();
@@ -816,7 +884,7 @@ describe('AutoComplete.vue', () => {
     await wrapper.vm.$nextTick();
 
     expect(wrapper.findAll('.test-slot__suggestion').length).toBe(4);
-    
+
     expect(
       wrapper.findAll('.autocomplete__suggestion-results-item').length,
     ).toBe(4);

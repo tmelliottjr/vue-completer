@@ -7,4 +7,7 @@ module.exports = {
       entry: './docs/main.js',
     },
   },
+  devServer: {
+    disableHostCheck: true,
+  },
 };

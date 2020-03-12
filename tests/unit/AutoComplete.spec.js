@@ -1,5 +1,5 @@
 import { shallowMount, mount } from '@vue/test-utils';
-import AutoComplete from '@/components/AutoComplete';
+import VueAutoComplete from '@/components/VueAutoComplete';
 
 const simpleSuggestions = [
   'Jacob',
@@ -43,12 +43,12 @@ const complexSuggestionsFilter = query => {
   });
 };
 
-describe('AutoComplete.vue', () => {
+describe('VueAutoComplete.vue', () => {
   it('mounts properly', () => {
     const propsData = {
       suggestions: [],
     };
-    const wrapper = shallowMount(AutoComplete, { propsData });
+    const wrapper = shallowMount(VueAutoComplete, { propsData });
     expect(wrapper.find('.autocomplete__container').exists()).toBeTruthy();
   });
 
@@ -65,7 +65,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestions="suggestions"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -102,7 +102,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestionValue="suggestionValue" :suggestions="suggestions"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -143,7 +143,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestionValue="suggestionValue" :suggestions="suggestions" @selectionChange="selectionChange"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -175,7 +175,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :limit="2" :suggestions="suggestions"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -203,7 +203,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestions="suggestions"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -239,7 +239,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestions="suggestions"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -283,7 +283,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestions="suggestions"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
@@ -326,7 +326,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestions="suggestions"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -362,7 +362,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :highlightFirst="false" :suggestions="suggestions"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -423,7 +423,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :highlightFirst="false" :noCycle="true" :suggestions="suggestions"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -495,7 +495,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestions="suggestions" :highlightFirst="false" @selectionChange="selectionChange"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -534,7 +534,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestions="suggestions" :highlightFirst="false" @selectionChange="selectionChange"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -579,7 +579,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestions="suggestions" :selectOnBlur="false" @selectionChange="selectionChange"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -624,7 +624,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestions="suggestions" @selectionChange="selectionChange"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
@@ -668,7 +668,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestions="suggestions" @selectionChange="selectionChange"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -713,7 +713,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestions="suggestions" :selectOnBlur="false" @selectionChange="selectionChange"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
     const inputWrapper = wrapper.find('.autocomplete__input');
 
@@ -757,7 +757,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestions="suggestions" :highlightFirst="false" @selectionChange="selectionChange"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -795,7 +795,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestions="suggestions" @selectionChange="selectionChange"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -831,7 +831,7 @@ describe('AutoComplete.vue', () => {
         },
       },
       template: `<div> <auto-complete v-model="query" :suggestions="suggestions" :highlightFirst="false" @selectionChange="selectionChange"></auto-complete> </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');
@@ -873,7 +873,7 @@ describe('AutoComplete.vue', () => {
                   </template>
                 </auto-complete>
               </div>`,
-      components: { 'auto-complete': AutoComplete },
+      components: { 'auto-complete': VueAutoComplete },
     });
 
     const inputWrapper = wrapper.find('.autocomplete__input');

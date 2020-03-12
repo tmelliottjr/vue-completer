@@ -1,18 +1,24 @@
 <template>
   <div>
+    Simple Suggestions
     <Simple />
+    Complex Suggestions
     <Complex />
+    Complex w/ Custom Slot
+    <ComplexSlot />
   </div>
 </template>
 <script>
 import Simple from './components/Simple.vue';
 import Complex from './components/Complex.vue';
+import ComplexSlot from './components/ComplexSlot.vue';
 
 export default {
   name: 'App',
   components: {
     Simple,
     Complex,
+    ComplexSlot,
   },
 };
 </script>

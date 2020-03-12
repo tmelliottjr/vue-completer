@@ -1,34 +1,28 @@
 <template>
   <div>
-    Complex Suggestions
-    <AutoComplete
+    <VueAutoComplete
       :limit="5"
       :suggestions="suggestions"
       @selectionChange="onSelectionChange"
-      :suggestionValue="getSuggestionValue"
+      :suggestionValue="selection => selection.value"
       ref="autocomplete"
-      :selectOnBlur="true"
-      :highlightFirst="true"
+      :selectOnBlur="false"
+      :highlightFirst="false"
       :noCycle="false"
       v-model="query"
     >
-      <template v-slot="{ suggestion }">
-        <EmployeeSuggestion :suggestion="suggestion" />
-      </template>
-    </AutoComplete>
+    </VueAutoComplete>
     <pre v-html="JSON.stringify(selection, null, 4)"></pre>
   </div>
 </template>
 
 <script>
-import AutoComplete from '@/components/AutoComplete.vue';
-import EmployeeSuggestion from './EmployeeSuggestion.vue';
+import VueAutoComplete from '@/components/VueAutoComplete.vue';
 
 export default {
   name: 'Complex',
   components: {
-    AutoComplete,
-    EmployeeSuggestion,
+    VueAutoComplete,
   },
   props: {
     msg: String,

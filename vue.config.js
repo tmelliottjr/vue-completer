@@ -4,7 +4,7 @@ module.exports = {
   },
   pages: {
     index: {
-      entry: './docs/main.js',
+      entry: './examples/main.js',
     },
   },
   devServer: {

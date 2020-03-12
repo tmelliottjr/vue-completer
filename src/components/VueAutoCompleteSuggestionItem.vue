@@ -16,7 +16,7 @@
 
 <script>
 export default {
-  name: 'auto-complete-suggestion-item',
+  name: 'vue-auto-complete-suggestion-item',
   props: {
     shouldHighlight: {
       type: Boolean,

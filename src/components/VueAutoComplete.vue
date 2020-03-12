@@ -30,7 +30,7 @@
         role="listbox"
         v-if="suggestionsShouldShow"
       >
-        <AutoCompleteSuggestionItem
+        <VueAutoCompleteSuggestionItem
           :key="index"
           :shouldHighlight="currentIndex === index"
           @select="onSelect"
@@ -43,23 +43,23 @@
           ></span>
           <!-- suggestion slot was provided -->
           <slot v-else v-bind:suggestion="suggestion" />
-        </AutoCompleteSuggestionItem>
+        </VueAutoCompleteSuggestionItem>
       </ul>
     </div>
   </div>
 </template>
 
 <script>
-import AutoCompleteSuggestionItem from './AutoCompleteSuggestionItem';
+import VueAutoCompleteSuggestionItem from './VueAutoCompleteSuggestionItem';
 
 export default {
   inheritAttrs: false,
-  name: 'auto-complete',
+  name: 'vue-auto-complete',
   model: {
     prop: 'query',
   },
   components: {
-    AutoCompleteSuggestionItem,
+    VueAutoCompleteSuggestionItem,
   },
   mounted() {
     // Allow easier access to the autocomplete input's ref

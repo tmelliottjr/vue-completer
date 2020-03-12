@@ -1,24 +1,24 @@
 <template>
   <div>
-    Simple Suggestions
-    <AutoComplete
+    <VueAutoComplete
       :limit="5"
+      :selectOnBlur="false"
       :suggestions="suggestions"
       @selectionChange="onSelectionChange"
       ref="autocomplete"
       v-model="query"
-    ></AutoComplete>
+    ></VueAutoComplete>
     <pre v-html="JSON.stringify(selection, null, 4)"></pre>
   </div>
 </template>
 
 <script>
-import AutoComplete from '@/components/AutoComplete.vue';
+import VueAutoComplete from '@/components/VueAutoComplete.vue';
 
 export default {
   name: 'Simple',
   components: {
-    AutoComplete,
+    VueAutoComplete,
   },
   props: {
     msg: String,

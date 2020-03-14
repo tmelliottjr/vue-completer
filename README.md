@@ -41,7 +41,8 @@ yarn add vue-completer
 ```
 
 ## Examples
-- [Simple Suggestions]()
+
+- [Simple Suggestions](https://codesandbox.io/s/simplesuggestions-drp7z)
 - [Complex Suggestions]()
 - [Complex Suggestions w/ Custom Slot]()
 

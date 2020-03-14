@@ -43,8 +43,8 @@ yarn add vue-completer
 ## Examples
 
 - [Simple Suggestions](https://codesandbox.io/s/simplesuggestions-drp7z)
-- [Complex Suggestions]()
-- [Complex Suggestions w/ Custom Slot]()
+- [Complex Suggestions]() (wip)
+- [Complex Suggestions w/ Custom Slot]() (wip)
 
 ## Props
 
@@ -195,6 +195,6 @@ VueCompleter does not provide **ANY** styles out of the box. See the [examples](
 
 ## Additional Information
 
-Any additional events or attributes are [inherited](https://vuejs.org/v2/api/#inheritAttrs) directly by the native input element.
+Any additional events or attributes are inherited directly by the native input element.
 
 VueCompleter supports the use of v-model. Note: when a selection is made, in addition to the `selectionChange` event an `input` event is also fired to update the value of v-model using the appropriate suggestion value.

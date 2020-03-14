@@ -2,7 +2,7 @@
   "name": "vue-completer",
   "version": "1.0.3",
   "private": false,
-  "description": "Vue.js Auto Complete",
+  "description": "A Vue Autocomplete component with accessibility and simplicity in mind.",
   "author": {
     "name": "Tom Elliott"
   },
@@ -78,10 +78,12 @@
     "list",
     "dropdown",
     "accessibility",
+    "accessible",
     "aria",
     "select",
     "selection",
-    "input"
+    "input",
+    "a11y"
   ],
   "homepage": "https://github.com/tmelliottjr/vue-completer",
   "repository": {

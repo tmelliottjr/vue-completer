@@ -66,7 +66,26 @@
     "> 1%",
     "last 2 versions"
   ],
-  "_id": "vue-completer@0.0.0",
   "license": "MIT",
-  "readme": "ERROR: No README data found!"
+  "keywords": [
+    "vue",
+    "vue-completer",
+    "complete",
+    "suggest",
+    "suggestion",
+    "autocomplete",
+    "auto",
+    "list",
+    "dropdown",
+    "accessibility",
+    "aria",
+    "select",
+    "selection",
+    "input"
+  ],
+  "homepage": "https://github.com/tmelliottjr/vue-completer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tmelliottjr/vue-completer.git"
+  }
 }

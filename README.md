@@ -43,8 +43,7 @@ yarn add vue-completer
 ## Examples
 
 - [Simple Suggestions](https://codesandbox.io/s/simplesuggestions-drp7z)
-- [Complex Suggestions]() (wip)
-- [Complex Suggestions w/ Custom Slot]() (wip)
+- [Complex Suggestions w/ Custom Slot](https://codesandbox.io/s/vue-completer-custom-slot-e4kct)
 
 ## Props
 

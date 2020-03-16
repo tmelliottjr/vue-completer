@@ -1,6 +1,6 @@
 {
   "name": "vue-completer",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "private": false,
   "description": "A Vue Autocomplete component with accessibility and simplicity in mind.",
   "author": {

@@ -24,12 +24,9 @@
     <div
       class="autocomplete__suggestion-results-container"
       id="autocomplete__suggestion-results"
+      v-if="suggestionsShouldShow"
     >
-      <ul
-        class="autocomplete__suggestion-results-list"
-        role="listbox"
-        v-if="suggestionsShouldShow"
-      >
+      <ul class="autocomplete__suggestion-results-list" role="listbox">
         <VueAutoCompleteSuggestionItem
           :key="index"
           :shouldHighlight="currentIndex === index"
@@ -211,7 +208,10 @@ export default {
           break;
         }
         case 13: {
-          this.processSelection(this.currentIndex);
+          // Only process the selection if suggestions are currently shown.
+          if (this.suggestionsShouldShow) {
+            this.processSelection(this.currentIndex);
+          }
           break;
         }
         case 27: {

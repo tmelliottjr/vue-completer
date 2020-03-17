@@ -162,6 +162,9 @@ export default {
       if (this.selection) {
         this.updateSelection(null);
       }
+
+      // Reset the current index as the user is typing
+      this.currentIndex = this.highlightFirst ? 0 : null;
     },
     /**
      * Focus event handler

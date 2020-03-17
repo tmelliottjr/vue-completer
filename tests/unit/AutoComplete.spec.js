@@ -121,6 +121,64 @@ describe('VueAutoComplete.vue', () => {
     ).toBe('Jacob');
   });
 
+  it('renders suggestions on focus when suggestionsOnFocus is true', async () => {
+    const wrapper = mount({
+      data() {
+        return {
+          query: 'j',
+        };
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestions="suggestions"></auto-complete> </div>`,
+      components: { 'auto-complete': VueAutoComplete },
+    });
+
+    const inputWrapper = wrapper.find('.autocomplete__input');
+
+    inputWrapper.trigger('focus');
+
+    await wrapper.vm.$nextTick();
+
+    expect(
+      wrapper.findAll('.autocomplete__suggestion-results-item').length,
+    ).toBe(4);
+
+    expect(
+      wrapper.find('#autocomplete__suggestion-results-item--0').text(),
+    ).toBe('Jacob');
+  });
+
+  it('does not render suggestions on focus when suggestionsOnFocus is false', async () => {
+    const wrapper = mount({
+      data() {
+        return {
+          query: 'j',
+        };
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div> <auto-complete v-model="query" :suggestionsOnFocus="false" :suggestions="suggestions"></auto-complete> </div>`,
+      components: { 'auto-complete': VueAutoComplete },
+    });
+
+    const inputWrapper = wrapper.find('.autocomplete__input');
+
+    inputWrapper.trigger('focus');
+
+    await wrapper.vm.$nextTick();
+
+    expect(
+      wrapper.findAll('.autocomplete__suggestion-results-item').length,
+    ).toBe(0);
+  });
+
   it('returns complex suggestion', async () => {
     const wrapper = mount({
       data() {

@@ -213,7 +213,7 @@ describe('VueAutoComplete.vue', () => {
 
     wrapper
       .find('#autocomplete__suggestion-results-item--3')
-      .trigger('mousedown');
+      .trigger('click');
 
     await wrapper.vm.$nextTick();
 
@@ -565,7 +565,7 @@ describe('VueAutoComplete.vue', () => {
 
     wrapper
       .find('#autocomplete__suggestion-results-item--3')
-      .trigger('mousedown');
+      .trigger('click');
 
     await wrapper.vm.$nextTick();
 
@@ -827,7 +827,7 @@ describe('VueAutoComplete.vue', () => {
 
     wrapper
       .find('#autocomplete__suggestion-results-item--3')
-      .trigger('mousedown');
+      .trigger('click');
 
     await wrapper.vm.$nextTick();
 

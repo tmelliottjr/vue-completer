@@ -139,6 +139,12 @@ export default {
       hideResults: false,
     };
   },
+  watch: {
+    suggestionsShouldShow(shouldShow) {
+      // Ensure the appropriate suggestion is highlighted
+      this.currentIndex = this.highlightFirst && shouldShow ? 0 : null;
+    },
+  },
   methods: {
     /**
      * Input event handler
@@ -153,9 +159,6 @@ export default {
       if (this.selection) {
         this.updateSelection(null);
       }
-
-      // Ensure the appropriate suggestion is highlighted
-      this.currentIndex = this.highlightFirst ? 0 : null;
     },
     /**
      * Focus event handler
@@ -163,9 +166,6 @@ export default {
     onFocus() {
       this.hideResults = false;
       this.isFocused = true;
-
-      // Ensure the appropriate suggestion is highlighted
-      this.currentIndex = this.highlightFirst ? 0 : null;
     },
     /**
      * Blur event handler
@@ -216,9 +216,6 @@ export default {
         }
         case 27: {
           this.hideResults = true;
-
-          // Reset the highlight position
-          this.currentIndex = null;
           break;
         }
       }

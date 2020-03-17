@@ -55,6 +55,7 @@ yarn add vue-completer
 | `noCycle`         | Used to stop at the top & bottom suggestions when using the up & down arrow keys.     | Boolean  | No       | False
 | `selectOnBlur`    | Used to automatically select the highlighted suggestion on blur. | Boolean  | No       | True
 | `highlightFirst`  | Used to automatically highlight the first suggestion when the suggestion list is rendered. | Boolean  | No       | True
+| `suggestionsOnFocus`  | Used to display the suggestion list on initial focus. | Boolean  | No       | True
 
 ### suggestions
 

@@ -113,6 +113,13 @@ export default {
       type: Boolean,
       default: false,
     },
+    /**
+     * Should show suggestions on initial focus
+     */
+    suggestionsOnFocus: {
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
@@ -130,13 +137,9 @@ export default {
        */
       input: null,
       /**
-       * The autocomplete's current focus status
-       */
-      isFocused: false,
-      /**
        * Used to force hide results. i.e. when a selection is made or the Esc key is hit.
        */
-      hideResults: false,
+      showResults: false,
     };
   },
   watch: {
@@ -152,7 +155,7 @@ export default {
     onInput() {
       // Ensure that the suggestion list is displayed after the user has made a selection,
       // but has started typing in the autocomplete input again
-      this.hideResults = false;
+      this.showResults = true;
 
       // If a selection has previously been made, clear the selection on input.
       // Do not fire on every input event.
@@ -164,8 +167,9 @@ export default {
      * Focus event handler
      */
     onFocus() {
-      this.hideResults = false;
-      this.isFocused = true;
+      // When the input is initially focused determine whether
+      // or not the suggestion list should be rendered
+      this.showResults = this.suggestionsOnFocus;
     },
     /**
      * Blur event handler
@@ -175,7 +179,7 @@ export default {
         this.processSelection(this.currentIndex);
       }
 
-      this.isFocused = false;
+      this.showResults = false;
     },
     /**
      * KeyDown event handler
@@ -192,7 +196,7 @@ export default {
       switch (key) {
         case 40:
           e.preventDefault();
-          this.hideResults = false;
+          this.showResults = true;
           this.navigateSuggestions('down');
           break;
         case 38: {
@@ -215,7 +219,7 @@ export default {
           break;
         }
         case 27: {
-          this.hideResults = true;
+          this.showResults = false;
           break;
         }
       }
@@ -261,7 +265,7 @@ export default {
       this.setQuery(this.suggestionValue(this.selection));
 
       // If the user has made a selection, this will hide the suggestions box
-      this.hideResults = true;
+      this.showResults = false;
     },
     /**
      * Handle traversing the suggestion list on arrow 'up' | 'down'.
@@ -382,11 +386,10 @@ export default {
      */
     suggestionsShouldShow() {
       return (
-        this.isFocused &&
         this.query &&
         this.query.trim().length > 0 &&
         this.limitedSuggestions.length > 0 &&
-        !this.hideResults
+        this.showResults
       );
     },
     /**

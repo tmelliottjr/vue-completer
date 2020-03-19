@@ -1,10 +1,10 @@
-import VueAutoComplete from './components/VueAutoComplete.vue';
+import AutoComplete from './components/AutoComplete.vue';
 
 // Declare install function executed by Vue.use()
 export function install(Vue) {
   if (install.installed) return;
   install.installed = true;
-  Vue.component('vue-auto-complete', VueAutoComplete);
+  Vue.component('vue-auto-complete', AutoComplete);
 }
 
 // Create module definition for Vue.use()
@@ -24,4 +24,4 @@ if (GlobalVue) {
 }
 
 // To allow use as module (npm/webpack/etc.) export component
-export default VueAutoComplete;
+export default AutoComplete;

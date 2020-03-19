@@ -1,35 +1,38 @@
 <template>
-  <div class="autocomplete__container">
+  <div :class="selectors.container">
     <input
       :aria-activedescendant="
         suggestionsShouldShow
-          ? `autocomplete__suggestion-results-item--${currentIndex}`
+          ? `${selectors.resultItemId}${currentIndex}`
           : null
       "
       :aria-expanded="suggestionsShouldShow ? 'true' : 'false'"
+      :aria-owns="selectors.resultsContainerId"
+      :class="selectors.input"
       :value="query"
       @blur="onBlur"
       @focus="onFocus"
       @input="onInput"
       @keydown="onKeyDown"
       aria-autocomplete="both"
-      aria-owns="autocomplete__suggestion-results"
       autocomplete="off"
-      class="autocomplete__input"
       ref="input"
       type="text"
       v-bind="$attrs"
       v-on="inputListeners"
     />
     <div
-      class="autocomplete__suggestion-results-container"
-      id="autocomplete__suggestion-results"
+      :class="selectors.resultsContainer"
+      :id="selectors.resultsContainerId"
       v-if="suggestionsShouldShow"
     >
-      <ul class="autocomplete__suggestion-results-list" role="listbox">
-        <VueAutoCompleteSuggestionItem
+      <ul :class="selectors.resultsList" role="listbox">
+        <AutoCompleteSuggestion
           :key="index"
           :shouldHighlight="currentIndex === index"
+          :suggestionId="selectors.resultItemId"
+          :suggestionClass="selectors.resultItem"
+          :highlightClass="selectors.highlightedResultItem"
           @select="onSelect"
           v-for="(suggestion, index) in limitedSuggestions"
         >
@@ -40,14 +43,15 @@
           ></span>
           <!-- suggestion slot was provided -->
           <slot v-else v-bind:suggestion="suggestion" />
-        </VueAutoCompleteSuggestionItem>
+        </AutoCompleteSuggestion>
       </ul>
     </div>
   </div>
 </template>
 
 <script>
-import VueAutoCompleteSuggestionItem from './VueAutoCompleteSuggestionItem';
+import AutoCompleteSuggestion from './AutoCompleteSuggestion';
+import { getNamespacedSelectors } from '../util';
 
 export default {
   inheritAttrs: false,
@@ -56,7 +60,10 @@ export default {
     prop: 'query',
   },
   components: {
-    VueAutoCompleteSuggestionItem,
+    AutoCompleteSuggestion,
+  },
+  created() {
+    this.selectors = getNamespacedSelectors(this.namespace);
   },
   mounted() {
     // Allow easier access to the autocomplete input's ref
@@ -80,7 +87,7 @@ export default {
     /**
      * When true, automatically highlights the first suggestion
      */
-    highlightFirst: {
+    highlightFirstSuggestion: {
       type: Boolean,
       default: true,
     },
@@ -95,7 +102,7 @@ export default {
      * User supplied function to determine the suggestion value to display.
      * i.e. An array of suggestion objects: [{ code: 'RI', value: 'Rhode Island' }]
      */
-    suggestionValue: {
+    getSuggestionValue: {
       type: Function,
       default: suggestion => suggestion,
     },
@@ -109,9 +116,9 @@ export default {
     /**
      * Should arrows stop at bottom/top suggestion
      */
-    noCycle: {
+    highlightCycle: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     /**
      * Should show suggestions on initial focus
@@ -119,6 +126,13 @@ export default {
     suggestionsOnFocus: {
       type: Boolean,
       default: true,
+    },
+    /**
+     * CSS Namespace to use for class/id selectors
+     */
+    namespace: {
+      type: String,
+      default: null,
     },
   },
   data() {
@@ -140,12 +154,14 @@ export default {
        * Used to force hide results. i.e. when a selection is made or the Esc key is hit.
        */
       showResults: false,
+      selectors: null,
     };
   },
   watch: {
     suggestionsShouldShow(shouldShow) {
       // Ensure the appropriate suggestion is highlighted
-      this.currentIndex = this.highlightFirst && shouldShow ? 0 : null;
+      this.currentIndex =
+        this.highlightFirstSuggestion && shouldShow ? 0 : null;
     },
   },
   methods: {
@@ -164,7 +180,7 @@ export default {
       }
 
       // Reset the current index as the user is typing
-      this.currentIndex = this.highlightFirst ? 0 : null;
+      this.currentIndex = this.highlightFirstSuggestion ? 0 : null;
     },
     /**
      * Focus event handler
@@ -243,7 +259,7 @@ export default {
       this.selection = this.suggestions[selectionIndex] || null;
 
       const suggestionValue = this.selection
-        ? this.suggestionValue(this.selection)
+        ? this.getSuggestionValue(this.selection)
         : null;
 
       this.$emit('selectionChange', this.selection);
@@ -265,7 +281,7 @@ export default {
       this.updateSelection(selectionIndex);
 
       // Update the input's value with the current selection's value
-      this.setQuery(this.suggestionValue(this.selection));
+      this.setQuery(this.getSuggestionValue(this.selection));
 
       // If the user has made a selection, this will hide the suggestions box
       this.showResults = false;
@@ -299,7 +315,7 @@ export default {
       const reachedUpperLimit =
         this.currentIndex === upperLimit && direction === 'down';
 
-      if ((reachedLowerLimit || reachedUpperLimit) && this.noCycle) {
+      if ((reachedLowerLimit || reachedUpperLimit) && !this.highlightCycle) {
         return;
       }
 
@@ -327,7 +343,7 @@ export default {
       try {
         const re = new RegExp(searchString.trim(), 'sgi');
         return haystack.replace(re, match => {
-          return `<span class="autocomplete__suggestion-query-match">${match}</span>`;
+          return `<span class="${this.selectors.queryMatch}">${match}</span>`;
         });
       } catch (e) {
         return haystack;
@@ -351,7 +367,7 @@ export default {
     formattedSuggestion(suggestion) {
       return this.highlightQueryString(
         this.query,
-        this.suggestionValue(suggestion),
+        this.getSuggestionValue(suggestion),
       );
     },
     /**

@@ -1,13 +1,10 @@
 <template>
   <li
     :aria-selected="shouldHighlight ? 'true' : 'false'"
-    :class="{
-      'autocomplete__suggestion-results-item--highlighted': shouldHighlight,
-    }"
-    :id="`autocomplete__suggestion-results-item--${$vnode.key}`"
+    :class="[{ [highlightClass]: shouldHighlight }, suggestionClass]"
+    :id="`${suggestionId}${$vnode.key}`"
     @click="onClick"
     @mousedown="onMouseDown"
-    class="autocomplete__suggestion-results-item"
     role="option"
     tabindex="-1"
   >
@@ -17,11 +14,23 @@
 
 <script>
 export default {
-  name: 'vue-auto-complete-suggestion-item',
+  name: 'vue-auto-complete-suggestion',
   props: {
     shouldHighlight: {
       type: Boolean,
       default: false,
+    },
+    highlightClass: {
+      type: String,
+      required: true,
+    },
+    suggestionClass: {
+      type: String,
+      required: true,
+    },
+    suggestionId: {
+      type: String,
+      required: true,
     },
   },
   methods: {
@@ -31,7 +40,7 @@ export default {
     },
     onClick() {
       this.$emit('select', this.$vnode.key);
-    }
+    },
   },
 };
 </script>

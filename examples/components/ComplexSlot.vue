@@ -1,29 +1,29 @@
 <template>
   <div>
-    <VueAutoComplete
+    <VueCompleter
       :limit="5"
       :suggestions="suggestions"
       @selectionChange="onSelectionChange"
-      :suggestionValue="suggestion => suggestion.value"
-      :noCycle="true"
+      :getSuggestionValue="suggestion => suggestion.value"
+      :highlightCycle="true"
       v-model="query"
     >
       <template v-slot="{ suggestion }">
         <EmployeeSuggestion :suggestion="suggestion" />
       </template>
-    </VueAutoComplete>
+    </VueCompleter>
     <pre v-html="JSON.stringify(selection, null, 4)"></pre>
   </div>
 </template>
 
 <script>
-import VueAutoComplete from '@/components/VueAutoComplete.vue';
+import VueCompleter from '@/components/AutoComplete.vue';
 import EmployeeSuggestion from './EmployeeSuggestion.vue';
 
 export default {
   name: 'ComplexSlot',
   components: {
-    VueAutoComplete,
+    VueCompleter,
     EmployeeSuggestion,
   },
   props: {

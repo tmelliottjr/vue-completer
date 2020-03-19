@@ -1,28 +1,28 @@
 <template>
   <div>
-    <VueAutoComplete
+    <VueCompleter
       :limit="5"
       :suggestions="suggestions"
       @selectionChange="onSelectionChange"
-      :suggestionValue="selection => selection.value"
+      :getSuggestionValue="selection => selection.value"
       ref="autocomplete"
       :selectOnBlur="false"
-      :highlightFirst="false"
-      :noCycle="false"
+      :highlightFirstSuggestion="false"
+      :highlightCycle="false"
       v-model="query"
     >
-    </VueAutoComplete>
+    </VueCompleter>
     <pre v-html="JSON.stringify(selection, null, 4)"></pre>
   </div>
 </template>
 
 <script>
-import VueAutoComplete from '@/components/VueAutoComplete.vue';
+import VueCompleter from '@/components/AutoComplete.vue';
 
 export default {
   name: 'Complex',
   components: {
-    VueAutoComplete,
+    VueCompleter,
   },
   props: {
     msg: String,

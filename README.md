@@ -19,21 +19,21 @@ yarn add vue-completer
 
 ```javascript
 <template>
-    <AutoComplete
+    <VueCompleter
       :limit="5"
       :suggestions="suggestions"
       @selectionChange="onSelectionChange"
       v-model="query"
-    ></AutoComplete>
+    ></VueCompleter>
 </template>
 
 <script>
-  import { AutoComplete } from 'vue-completer';
+  import VueCompleter from 'vue-completer';
 
   export default {
     ...
     components: {
-        AutoComplete
+        VueCompleter
     }
     ...
   };
@@ -50,16 +50,17 @@ yarn add vue-completer
 | Property          | Description |Type      | Required | Default |
 | -------------     |-------------|----------|----------|---------|
 | `suggestions`     | An array of suggestions to be rendered. This can be as simple as an array of string values or deeply nested objects.    | Array    | Yes      |
-| `suggestionValue` | Used to determine the value to be rendered in the suggestion list. *_Required for non-string suggestions. i.e. an array of suggestion objects._    | Function | No*       |  
+| `getSuggestionValue` | Used to determine the value to be rendered in the suggestion list. *_Required for non-string suggestions. i.e. an array of suggestion objects._    | Function | No*       |  
 | `limit`           | The number of suggestions to render.      | Number   | No       | 5
-| `noCycle`         | Used to stop at the top & bottom suggestions when using the up & down arrow keys.     | Boolean  | No       | False
+| `highlightCycle`         | Used to stop at the top & bottom suggestions when using the up & down arrow keys.     | Boolean  | No       | true
 | `selectOnBlur`    | Used to automatically select the highlighted suggestion on blur. | Boolean  | No       | True
-| `highlightFirst`  | Used to automatically highlight the first suggestion when the suggestion list is rendered. | Boolean  | No       | True
+| `highlightFirstSuggestion`  | Used to automatically highlight the first suggestion when the suggestion list is rendered. | Boolean  | No       | True
 | `suggestionsOnFocus`  | Used to display the suggestion list on initial focus. | Boolean  | No       | True
+| `namespace`  | CSS namespace to use for class & id selectors. | String  | No       | 
 
 ### suggestions
 
-The supplied suggestions array can be as simple as an array of strings or more complex as in an array of objects. When using objects, use the [suggestionValue](#suggestionvalue) prop to tell VueCompleter how to render the suggestions.
+The supplied suggestions array can be as simple as an array of strings or more complex as in an array of objects. When using objects, use the [getSuggestionValue](#getsuggestionvalue) prop to tell VueCompleter how to render the suggestions.
 
 **Simple:**
 
@@ -107,18 +108,18 @@ dataset: [
 ]
 ```
 
-### suggestionValue
+### getSuggestionValue
 
 When using a more complex suggestion, like an object, VueCompleter needs to know how to render suggestions. For example, using the complex example above:
 
 ```javascript
 <template>
-    <AutoComplete
+    <VueCompleter
       :suggestions="suggestions"
-      :suggestionValue="getSuggestionValue"
+      :getSuggestionValue="getSuggestionValue"
       @selectionChange="onSelectionChange"
       v-model="query"
-    ></AutoComplete>
+    ></VueCompleter>
 </template>
 
 <script>
@@ -138,7 +139,7 @@ export default {
 For more control over the rendered suggestions, the `suggestion` [scoped slot](https://vuejs.org/v2/guide/components-slots.html#Scoped-Slots) is available. This allows the use of any markup or component you want.
 
 ```javascript
-<AutoComplete
+<VueCompleter
   :suggestions="suggestions"
   @selectionChange="onSelectionChange"
   v-model="query"
@@ -146,7 +147,7 @@ For more control over the rendered suggestions, the `suggestion` [scoped slot](h
   <template v-slot="{ suggestion }">
     <EmployeeSuggestion :suggestion="suggestion" />
   </template>
-</AutoComplete>
+</VueCompleter>
 ```
 
 EmployeeSuggestion.vue
@@ -182,6 +183,8 @@ export default {
 
 ## Classes & Styling
 VueCompleter does not provide **ANY** styles out of the box. See the [examples](#examples) for ideas.
+
+Selectors will be prepended with the value provided in the `namespace` prop. For example, a namespace of "employeelist" will result in `employeelist-autocomplete__container`.
 
 |Class|Description|
 |-----|-----------|

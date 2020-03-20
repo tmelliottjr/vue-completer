@@ -1,4 +1,4 @@
-
+[![Build Status](https://travis-ci.com/tmelliottjr/vue-completer.svg?branch=master)](https://travis-ci.com/tmelliottjr/vue-completer)
 # VueCompleter
 
 A Vue Autocomplete component with accessibility and simplicity in mind.

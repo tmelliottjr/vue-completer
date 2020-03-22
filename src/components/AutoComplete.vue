@@ -154,45 +154,33 @@ export default {
        * Used to force hide results. i.e. when a selection is made or the Esc key is hit.
        */
       showResults: false,
+      /**
+       * CSS Selectors
+       */
       selectors: null,
     };
   },
   watch: {
     suggestionsShouldShow(shouldShow) {
-      // Ensure the appropriate suggestion is highlighted
       this.currentIndex =
         this.highlightFirstSuggestion && shouldShow ? 0 : null;
     },
   },
   methods: {
-    /**
-     * Input event handler
-     */
-    onInput() {
-      // Ensure that the suggestion list is displayed after the user has made a selection,
-      // but has started typing in the autocomplete input again
+    onInput(event) {
+      this.setQuery(event.target.value);
+
       this.showResults = true;
 
-      // If a selection has previously been made, clear the selection on input.
-      // Do not fire on every input event.
       if (this.selection) {
         this.updateSelection(null);
       }
 
-      // Reset the current index as the user is typing
       this.currentIndex = this.highlightFirstSuggestion ? 0 : null;
     },
-    /**
-     * Focus event handler
-     */
     onFocus() {
-      // When the input is initially focused determine whether
-      // or not the suggestion list should be rendered
       this.showResults = this.suggestionsOnFocus;
     },
-    /**
-     * Blur event handler
-     */
     onBlur() {
       if (this.selectOnBlur && this.suggestionsShouldShow) {
         this.processSelection(this.currentIndex);
@@ -200,9 +188,6 @@ export default {
 
       this.showResults = false;
     },
-    /**
-     * KeyDown event handler
-     */
     onKeyDown(e) {
       const key = e.which || e.keyCode || 0;
       /**
@@ -224,14 +209,13 @@ export default {
           break;
         }
         case 9: {
-          // If selectOnBlur is true, prevent  selection on tab from also firing
+          // If selectOnBlur is true, prevent selection on tab from also firing
           if (!this.selectOnBlur) {
             this.processSelection(this.currentIndex);
           }
           break;
         }
         case 13: {
-          // Only process the selection if suggestions are currently shown.
           if (this.suggestionsShouldShow) {
             this.processSelection(this.currentIndex);
           }
@@ -243,29 +227,18 @@ export default {
         }
       }
     },
-    /**
-     * Select event handler
-     */
     onSelect(selectionIndex) {
       this.processSelection(selectionIndex);
     },
     /**
-     * Updates the current selection and emits 'selectionChange' to update v-model.
-     * Fires when a selection is made or input changes.
+     * Updates the current selection and emits 'selectionChange' and 'input'.
      *
      * @param {Number} selectionIndex The current selection's index
      */
     updateSelection(selectionIndex) {
       this.selection = this.suggestions[selectionIndex] || null;
 
-      const suggestionValue = this.selection
-        ? this.getSuggestionValue(this.selection)
-        : null;
-
       this.$emit('selectionChange', this.selection);
-
-      // For completeness, when a selection is made also update v-model
-      this.$emit('input', suggestionValue);
     },
     /**
      * Processes the user's selection.
@@ -280,10 +253,8 @@ export default {
 
       this.updateSelection(selectionIndex);
 
-      // Update the input's value with the current selection's value
       this.setQuery(this.getSuggestionValue(this.selection));
 
-      // If the user has made a selection, this will hide the suggestions box
       this.showResults = false;
     },
     /**
@@ -386,15 +357,13 @@ export default {
      * @returns {object} An object of listeners to apply to the input element
      */
     inputListeners() {
-      const vm = this;
       return {
         ...this.$listeners,
         /**
-         * Don't do anything native for input, allowing v-model to work seemlessly.
-         *
+         * Don't do anything native for input.
          */
-        input(event) {
-          vm.setQuery(event.target.value);
+        input() {
+          return;
         },
       };
     },

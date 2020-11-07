@@ -12,12 +12,12 @@ const simpleSuggestions = [
   'Tom',
 ];
 
-const simpleSuggestionsFilter = query => {
+const simpleSuggestionsFilter = (query) => {
   if (!query) {
     return [];
   }
 
-  return simpleSuggestions.filter(s => {
+  return simpleSuggestions.filter((s) => {
     return s.toLowerCase().includes(query.toLowerCase());
   });
 };
@@ -33,12 +33,12 @@ const complexSuggestions = [
   { code: 'HH', value: 'Tom' },
 ];
 
-const complexSuggestionsFilter = query => {
+const complexSuggestionsFilter = (query) => {
   if (!query) {
     return [];
   }
 
-  return complexSuggestions.filter(s => {
+  return complexSuggestions.filter((s) => {
     return s.value.toLowerCase().includes(query.toLowerCase());
   });
 };
@@ -999,5 +999,54 @@ describe('AutoComplete.vue', () => {
       true,
     );
     expect(wrapper.find(expectedSelectors.resultsList).exists()).toBe(true);
+  });
+
+  it('renders custom input slot', async () => {
+    const wrapper = mount({
+      data() {
+        return {
+          query: null,
+          selection: null,
+        };
+      },
+      methods: {
+        selectionChange(selection) {
+          this.selection = selection;
+        },
+      },
+      computed: {
+        suggestions() {
+          return simpleSuggestionsFilter(this.query);
+        },
+      },
+      template: `<div>
+                  <auto-complete v-model="query" :suggestions="suggestions" :highlightFirstSuggestion="false" @selectionChange="selectionChange">
+                    <template v-slot:input="{inputListeners, inputAttrs}">
+                      <input v-on="inputListeners" v-bind="inputAttrs"/>
+                    </template>
+                    <template v-slot="{suggestion}">
+                      <div class="test-slot__suggestion"> {{ suggestion }} </div>
+                    </template>
+                  </auto-complete>
+                 </div>`,
+      components: { 'auto-complete': AutoComplete },
+    });
+
+    const inputWrapper = wrapper.find('.autocomplete__input');
+
+    inputWrapper.trigger('focus');
+    inputWrapper.setValue('j');
+
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.findAll('.test-slot__suggestion').length).toBe(4);
+
+    expect(
+      wrapper.findAll('.autocomplete__suggestion-results-item').length,
+    ).toBe(4);
+
+    expect(
+      wrapper.find('#autocomplete__suggestion-results-item--0').text(),
+    ).toBe('Jacob');
   });
 });

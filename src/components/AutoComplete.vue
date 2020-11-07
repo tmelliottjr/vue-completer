@@ -1,26 +1,12 @@
 <template>
   <div :class="selectors.container">
-    <input
-      :aria-activedescendant="
-        suggestionsShouldShow
-          ? `${selectors.resultItemId}${currentIndex}`
-          : null
-      "
-      :aria-expanded="suggestionsShouldShow ? 'true' : 'false'"
-      :aria-owns="selectors.resultsContainerId"
-      :class="selectors.input"
-      :value="query"
-      @blur="onBlur"
-      @focus="onFocus"
-      @input="onInput"
-      @keydown="onKeyDown"
-      aria-autocomplete="both"
-      autocomplete="off"
-      ref="input"
-      type="text"
-      v-bind="$attrs"
-      v-on="inputListeners"
-    />
+    <slot
+      name="input"
+      :inputAttrs="inputAttrs"
+      :inputListeners="inputListeners"
+    >
+      <input v-bind="{ ...$attrs, ...inputAttrs }" v-on="inputListeners" />
+    </slot>
     <div
       :class="selectors.resultsContainer"
       :id="selectors.resultsContainerId"
@@ -104,7 +90,7 @@ export default {
      */
     getSuggestionValue: {
       type: Function,
-      default: suggestion => suggestion,
+      default: (suggestion) => suggestion,
     },
     /**
      * Number of suggestions to display
@@ -158,6 +144,16 @@ export default {
        * CSS Selectors
        */
       selectors: null,
+
+      /**
+       * Input Listeners
+       */
+      listeners: {
+        blur: this.onBlur,
+        focus: this.onFocus,
+        input: this.onInput,
+        keydown: this.onKeyDown,
+      },
     };
   },
   watch: {
@@ -168,7 +164,16 @@ export default {
   },
   methods: {
     onInput(event) {
-      this.setQuery(event.target.value);
+      let value;
+
+      // Detect custom input components, such as VueBootstrap's Input
+      if (event instanceof Event && 'target' in event) {
+        value = event.target.value;
+      } else {
+        value = event;
+      }
+
+      this.setQuery(value);
 
       this.showResults = true;
 
@@ -313,7 +318,7 @@ export default {
       const searchString = this.escapeRegExp(needle);
       try {
         const re = new RegExp(searchString.trim(), 'sgi');
-        return haystack.replace(re, match => {
+        return haystack.replace(re, (match) => {
           return `<span class="${this.selectors.queryMatch}">${match}</span>`;
         });
       } catch (e) {
@@ -359,12 +364,7 @@ export default {
     inputListeners() {
       return {
         ...this.$listeners,
-        /**
-         * Don't do anything native for input.
-         */
-        input() {
-          return;
-        },
+        ...this.listeners,
       };
     },
     /**
@@ -388,6 +388,23 @@ export default {
      */
     limitedSuggestions() {
       return this.suggestions.slice(0, this.limit);
+    },
+    /**
+     * Defines attributes used by the input component.
+     *
+     * @return {object} The attributes to be applied to the input element
+     */
+    inputAttrs() {
+      return {
+        'aria-autocomplete': 'both',
+        'aria-expanded': this.suggestionsShouldShow ? 'true' : 'false',
+        'aria-owns': this.selectors.resultsContainerId,
+        autocomplete: 'off',
+        class: this.selectors.input,
+        ref: 'input',
+        type: 'text',
+        value: this.query,
+      };
     },
   },
 };

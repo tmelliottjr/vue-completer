@@ -2,6 +2,8 @@
   <div>
     Simple Suggestions
     <Simple />
+    Simple w/ Custom Input
+    <SimpleCustomInput />
     Complex Suggestions
     <Complex />
     Complex w/ Custom Slot
@@ -10,6 +12,7 @@
 </template>
 <script>
 import Simple from './components/Simple.vue';
+import SimpleCustomInput from './components/SimpleCustomInput.vue';
 import Complex from './components/Complex.vue';
 import ComplexSlot from './components/ComplexSlot.vue';
 
@@ -19,6 +22,7 @@ export default {
     Simple,
     Complex,
     ComplexSlot,
+    SimpleCustomInput,
   },
 };
 </script>

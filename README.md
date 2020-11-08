@@ -44,6 +44,7 @@ yarn add vue-completer
 
 - [Simple Suggestions](https://codesandbox.io/s/simplesuggestions-drp7z)
 - [Complex Suggestions w/ Custom Slot](https://codesandbox.io/s/vue-completer-custom-slot-e4kct)
+- [Custom Input](https://codesandbox.io/s/simplesuggestions-w-custom-input-y6ynw)
 
 ## Props
 

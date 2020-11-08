@@ -136,7 +136,7 @@ export default {
 
 ## Slots
 
-For more control over the rendered suggestions, the `suggestion` [scoped slot](https://vuejs.org/v2/guide/components-slots.html#Scoped-Slots) is available. This allows the use of any markup or component you want.
+For more control over the rendered suggestions, the `suggestion` default [scoped slot](https://vuejs.org/v2/guide/components-slots.html#Scoped-Slots) is available. This allows the use of any markup or component you want.
 
 ```javascript
 <VueCompleter
@@ -174,6 +174,23 @@ export default {
   props: ['suggestion'],
 };
 </script>
+```
+
+Additionally, you can use the `input` named slot for providing your own custom input element. This can be useful when working with UI frameworks such as Bootstrap.
+
+```javascript
+<VueCompleter
+  :suggestions="suggestions"
+  @selectionChange="onSelectionChange"
+  v-model="query"
+>
+  <template v-slot:input="{ inputListeners, inputAttrs }">
+    <b-form-input
+      v-on="inputListeners"
+      v-bind="inputAttrs"
+      ...
+  </template>
+</VueCompleter>
 ```
 
 ## Events
